@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quota checker</title>
+  </head>
+
+  <body>
+    <h1>Storage quota</h1>
+    <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
+
+    <script>
+      (async function() {
+        const {quota} = await navigator.storage.estimate(); 
+        document.getElementById('storage').textContent = (quota / 1024 / 1024 / 1024).toFixed(2);
+      })()
+    </script>
+  </body>
+</html>
