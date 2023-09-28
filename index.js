@@ -46,6 +46,23 @@ const initIndexedDb = (dbName, stores) => {
 	});
 };
 
+const renderAvailableImagesFromDb = () => {
+  db.transaction('localFiles', 'readonly').objectStore('localFiles').openCursor().onsuccess = (event) => {
+    const cursor = event.target.result;
+    console.log(cursor)
+    if (cursor) {
+      const image = document.createElement('img');
+      const imageName = cursor.value.fileName;
+      const imageBuffer = cursor.value.data;
+      const imageBlog = new Blob([imageBuffer]);
+      image.src = URL.createObjectURL(imageBlog);
+      image.title = imageName;
+      document.getElementById('images').appendChild(image);
+      cursor.continue();
+    }
+  };
+}
+
 const handleSubmit = async (ev) => {
 	ev.preventDefault();
 	const file = await getFileFromInput();
@@ -58,3 +75,5 @@ document.querySelector('form')?.addEventListener('submit', handleSubmit);
 (async () => {
 	db = await initIndexedDb('my-db', [{ name: 'localFiles', keyPath: 'fileName' }]);
 })();
+
+window.addEventListener('load', renderAvailableImagesFromDb);
