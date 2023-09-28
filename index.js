@@ -61,7 +61,11 @@ const initIndexedDb = (dbName, stores) => {
 	});
 };
 
-
+const clearEntriesFromIndexedDb = () => {
+  console.log('Deleting entries')
+  db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
+  clearPreviousImages();
+}
 
 const renderAvailableImagesFromDb = () => {
 	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
@@ -99,6 +103,7 @@ const clearPreviousImages = () => {
 }
 
 document.querySelector('form')?.addEventListener('submit', handleSubmit);
+document.querySelector('#clear-button')?.addEventListener('click', clearEntriesFromIndexedDb)
 
 window.addEventListener('load', async () => {
 	db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);

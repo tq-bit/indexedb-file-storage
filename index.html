@@ -9,15 +9,25 @@
 </head>
 
 <body class="container">
-  <div class="row">
-    <div class="col">
-      <h1>Storage quota</h1>
-      <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
-      <form id="form">
-        <input type="file" id="file">
-        <input type="submit" value="submit">
-      </form>
+  <div class="row mb-4">
+    <div class="col"></div>
+    <div class="col-6">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title">Storage Quota</h5>
+          <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
+          <form id="form">
+            <label for="file" class="form-label">Select a file</label>
+            <input type="file" id="file" class="form-control mb-2">
+            <div class="d-grid gap-2">
+              <input type="submit" value="Add to IndexedDB" class="btn btn-primary block">
+              <input type="button" value="Clear" id="clear-button" class="btn btn-danger block">
+            </div>
+          </form>
+        </div>
+      </div>
     </div>
+    <div class="col"></div>
   </div>
   <div class="row" id="images"></div>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-C6RzsynM9kWDrMNeT87bh95OGNyZPhcTNXj1NW7RuBCsyN/o0jlpcV8Qyq46cDfL" crossorigin="anonymous"></script>
