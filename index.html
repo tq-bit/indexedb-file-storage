@@ -8,14 +8,16 @@
   <title>Quota checker</title>
 </head>
 
-<body class="container">
+<body class="container mt-4">
   <div class="row mb-4">
     <div class="col"></div>
     <div class="col-6">
       <div class="card">
         <div class="card-body">
           <h5 class="card-title">Storage Quota</h5>
-          <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
+          <p>This browser has a storage quota of <b id="storage-total">0</b> <br>It currently uses <b id="storage-used">0</b> <br> and has around <b id="storage-free">0</b> free </p>
+          <blockquote class="alert alert-info">Note: These values are estimates calculated with Javascript</blockquote>
+
           <form id="form">
             <label for="file" class="form-label">Select a file</label>
             <input type="file" id="file" class="form-control mb-2">
