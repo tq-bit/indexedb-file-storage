@@ -1,6 +1,6 @@
 'use strict';
 
-const storeName = 'localFiles'
+const storeName = 'localFiles';
 const storeKey = 'fileName';
 let db = null;
 
@@ -9,6 +9,11 @@ const handleSubmit = async (ev) => {
 	const file = await getFileFromInput();
 	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
 	store.add(file);
+
+  store.transaction.oncomplete = () => {
+    clearPreviousImages();
+    renderAvailableImagesFromDb();
+  }
 };
 
 /**
@@ -20,6 +25,7 @@ const getFileFromInput = () => {
 		const file = document.getElementById('file').files[0];
 		const reader = new FileReader();
 		reader.onload = (event) => {
+      document.getElementById('file').value = '';
 			resolve({
 				[storeKey]: file.name,
 				data: event.target.result,
@@ -55,26 +61,46 @@ const initIndexedDb = (dbName, stores) => {
 	});
 };
 
+
+
 const renderAvailableImagesFromDb = () => {
-  db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
-    const cursor = event.target.result;
-    console.log(cursor)
-    if (cursor) {
-      const image = document.createElement('img');
-      const imageName = cursor.value[storeKey];
-      const imageBuffer = cursor.value.data;
-      const imageBlog = new Blob([imageBuffer]);
-      image.src = URL.createObjectURL(imageBlog);
-      image.title = imageName;
-      document.getElementById('images').appendChild(image);
-      cursor.continue();
-    }
-  };
+	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
+		const cursor = event.target.result;
+		if (cursor) {
+			const imageBuffer = cursor.value.data;
+			const imageBlog = new Blob([imageBuffer]);
+
+      const col = document.createElement('div');
+      col.classList.add('col-4');
+
+			const card = document.createElement('div');
+			card.classList.add('card');
+
+			const image = document.createElement('img');
+			image.src = URL.createObjectURL(imageBlog);
+			image.classList.add('card-img-top');
+
+			const title = document.createElement('h5');
+			title.classList.add('card-title');
+			title.innerText = cursor.value[storeKey];
+
+			card.appendChild(image);
+			card.appendChild(title);
+      col?.appendChild(card);
+
+			document.getElementById('images').appendChild(col);
+			cursor.continue();
+		}
+	};
+};
+
+const clearPreviousImages = () => {
+  document.getElementById('images').innerHTML = '';
 }
 
 document.querySelector('form')?.addEventListener('submit', handleSubmit);
 
 window.addEventListener('load', async () => {
-  db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
-  renderAvailableImagesFromDb()
+	db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
+	renderAvailableImagesFromDb();
 });
