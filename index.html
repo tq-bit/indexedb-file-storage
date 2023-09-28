@@ -1,20 +1,23 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quota checker</title>
-  </head>
 
-  <body>
-    <h1>Storage quota</h1>
-    <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Quota checker</title>
+</head>
 
-    <script>
-      (async function() {
-        const {quota} = await navigator.storage.estimate(); 
-        document.getElementById('storage').textContent = (quota / 1024 / 1024 / 1024).toFixed(2);
-      })()
-    </script>
-  </body>
+<body>
+  <h1>Storage quota</h1>
+  <p>This browser has a storage quota of <b id="storage">0</b> gigabytes</p>
+  <form id="form">
+    <input type="file" id="file">
+    <input type="submit" value="submit">
+  </form>
+
+  <script src="index.js">
+
+  </script>
+</body>
+
 </html>
