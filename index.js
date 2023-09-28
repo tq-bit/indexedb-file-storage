@@ -1,6 +1,15 @@
 'use strict';
 
+const storeName = 'localFiles'
+const storeKey = 'fileName';
 let db = null;
+
+const handleSubmit = async (ev) => {
+	ev.preventDefault();
+	const file = await getFileFromInput();
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.add(file);
+};
 
 /**
  * @desc Gets the file from the input field
@@ -12,7 +21,7 @@ const getFileFromInput = () => {
 		const reader = new FileReader();
 		reader.onload = (event) => {
 			resolve({
-				fileName: file.name,
+				[storeKey]: file.name,
 				data: event.target.result,
 			});
 		};
@@ -47,12 +56,12 @@ const initIndexedDb = (dbName, stores) => {
 };
 
 const renderAvailableImagesFromDb = () => {
-  db.transaction('localFiles', 'readonly').objectStore('localFiles').openCursor().onsuccess = (event) => {
+  db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
     const cursor = event.target.result;
     console.log(cursor)
     if (cursor) {
       const image = document.createElement('img');
-      const imageName = cursor.value.fileName;
+      const imageName = cursor.value[storeKey];
       const imageBuffer = cursor.value.data;
       const imageBlog = new Blob([imageBuffer]);
       image.src = URL.createObjectURL(imageBlog);
@@ -63,17 +72,9 @@ const renderAvailableImagesFromDb = () => {
   };
 }
 
-const handleSubmit = async (ev) => {
-	ev.preventDefault();
-	const file = await getFileFromInput();
-	const store = db.transaction('localFiles', 'readwrite').objectStore('localFiles');
-	store.add(file);
-};
-
 document.querySelector('form')?.addEventListener('submit', handleSubmit);
 
-(async () => {
-	db = await initIndexedDb('my-db', [{ name: 'localFiles', keyPath: 'fileName' }]);
-})();
-
-window.addEventListener('load', renderAvailableImagesFromDb);
+window.addEventListener('load', async () => {
+  db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
+  renderAvailableImagesFromDb()
+});
