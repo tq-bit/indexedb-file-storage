@@ -161,7 +161,12 @@ document.querySelector('form')?.addEventListener('submit', handleSubmit);
 document.querySelector('#clear-button')?.addEventListener('click', clearEntriesFromIndexedDb);
 
 window.addEventListener('load', async () => {
-	db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
-	renderAvailableImagesFromDb();
-  await renderStorageQuotaInfo()
+	const persistent = await navigator.storage.persist()
+	if(persistent) {
+		db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
+		renderAvailableImagesFromDb();
+		await renderStorageQuotaInfo()
+	} else {
+		console.warn("Persistence is not supported");
+	}
 });
