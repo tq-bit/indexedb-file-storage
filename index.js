@@ -135,7 +135,7 @@ const renderAvailableImagesFromDb = () => {
 			const imageBlog = new Blob([imageBuffer]);
 
 			const col = document.createElement('div');
-			col.classList.add('col-4');
+			col.classList.add('col-12', 'col-md-6', 'col-lg-4');
 
 			const card = document.createElement('div');
 			card.classList.add('card');
