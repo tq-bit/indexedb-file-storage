@@ -2,6 +2,7 @@
 
 const storeName = 'localFiles';
 const storeKey = 'fileName';
+const dbVersion = 1
 let db = null;
 
 const formatAsByteString = (bytes) => {
@@ -107,7 +108,7 @@ const clearEntriesFromIndexedDb = () => {
  */
 const initIndexedDb = (dbName, stores) => {
 	return new Promise((resolve, reject) => {
-		const request = indexedDB.open(dbName, 1);
+		const request = indexedDB.open(dbName, dbVersion);
 		request.onerror = (event) => {
 			reject(event.target.error);
 		};
