@@ -4,6 +4,8 @@ const storeName = 'localFiles';
 const storeKey = 'fileName';
 let db = null;
 
+const formatAsByteString = (bytes) => {
+	const oneGigabyte = 1024 * 1024 * 1024;
 // Methods for Storage quota
 /**
  * @desc Gets the storage quota text
@@ -13,6 +15,12 @@ const getStorageQuotaText = async () => {
   const oneGigabyte = 1024 * 1024 * 1024;
   const oneMegabyte = 1024 * 1024;
   const oneKilobyte = 1024;
+
+	return bytes > oneGigabyte ? `${(bytes / oneGigabyte).toFixed(2)} GB` : bytes > oneMegabyte ? `${(bytes / oneMegabyte).toFixed(2)} MB` : `${(bytes / oneKilobyte).toFixed(2)}KB`;
+}
+
+// Methods for Storage quota
+const getStorageQuotaText = async () => {
 	const estimate = await navigator.storage.estimate();
 	const totalQuota = +(estimate.quota || 0);
 	const usedQuota = +(estimate.usage || 0);
@@ -67,6 +75,8 @@ const getFileFromInput = () => {
 			document.getElementById('file').value = '';
 			resolve({
 				[storeKey]: file.name,
+				size: file.size,
+				type: file.type,
 				data: event.target.result,
 			});
 		};
@@ -77,7 +87,16 @@ const getFileFromInput = () => {
 	});
 };
 
+const clearEntriesFromIndexedDb = () => {
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
 
+	store.clear()
+	clearPreviousImages();
+
+	store.transaction.oncomplete = () => {
+		renderStorageQuotaInfo();
+	}
+};
 
 // IndexedDB Methods
 /**
@@ -120,17 +139,31 @@ const renderAvailableImagesFromDb = () => {
 			const card = document.createElement('div');
 			card.classList.add('card');
 
+			const cardBody = document.createElement('div');
+			cardBody.classList.add('card-body');
+
 			const image = document.createElement('img');
 			image.src = URL.createObjectURL(imageBlog);
 			image.classList.add('card-img-top');
 
 			const title = document.createElement('h5');
 			title.classList.add('card-title');
-			title.innerText = cursor.value[storeKey];
+			title.innerText = cursor.value['type'];
 
+			const subTitle = document.createElement('h6');
+			subTitle.classList.add('card-subtitle');
+			subTitle.innerText = formatAsByteString(+cursor.value['size'])
+
+			const text = document.createElement('p');
+			text.classList.add('card-text');
+			text.innerText = cursor.value[storeKey];
+
+			cardBody.appendChild(title);
+			cardBody.appendChild(subTitle);
+			cardBody.appendChild(text)
 			card.appendChild(image);
-			card.appendChild(title);
-			col?.appendChild(card);
+			card.appendChild(cardBody);
+			col.appendChild(card);
 
 			document.getElementById('images').appendChild(col);
 			cursor.continue();
