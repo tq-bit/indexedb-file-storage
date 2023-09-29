@@ -88,16 +88,7 @@ const getFileFromInput = () => {
 	});
 };
 
-const clearEntriesFromIndexedDb = () => {
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
 
-	store.clear()
-	clearPreviousImages();
-
-	store.transaction.oncomplete = () => {
-		renderStorageQuotaInfo();
-	}
-};
 
 // IndexedDB Methods
 /**
@@ -123,10 +114,34 @@ const initIndexedDb = (dbName, stores) => {
 	});
 };
 
+<<<<<<< HEAD
 /**
  * @desc Renders the available images from the IndexedDB
  * @returns {void}
  */
+=======
+const clearEntriesFromIndexedDb = () => {
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+
+	store.clear()
+	clearPreviousImages();
+
+	store.transaction.oncomplete = () => {
+		renderStorageQuotaInfo();
+	}
+};
+
+const deleteImageFromIndexedDb = (storeKey) => {
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.delete(storeKey);
+	store.transaction.oncomplete = async () => {
+		clearPreviousImages();
+		renderAvailableImagesFromDb();
+		await renderStorageQuotaInfo();
+	}
+}
+
+>>>>>>> 9648598 (feat: add delete method)
 const renderAvailableImagesFromDb = () => {
 	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
 		const cursor = event.target.result;
@@ -159,9 +174,17 @@ const renderAvailableImagesFromDb = () => {
 			text.classList.add('card-text');
 			text.innerText = cursor.value[storeKey];
 
+			const deleteButton = document.createElement('button');
+			deleteButton.classList.add('btn', 'btn-danger');
+			deleteButton.innerText = 'Delete';
+			deleteButton.addEventListener('click', () => {
+				deleteImageFromIndexedDb(cursor.value[storeKey]);
+			})
+
 			cardBody.appendChild(title);
 			cardBody.appendChild(subTitle);
 			cardBody.appendChild(text)
+			cardBody.appendChild(deleteButton);
 			card.appendChild(image);
 			card.appendChild(cardBody);
 			col.appendChild(card);
