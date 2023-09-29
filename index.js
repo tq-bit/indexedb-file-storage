@@ -214,7 +214,7 @@ const clearEntriesFromIndexedDb = () => {
 };
 
 // Init event listeners
-document.querySelector('form')?.addEventListener('submit', handleSubmit);
+document.querySelector('#file-form')?.addEventListener('submit', handleSubmit);
 document.querySelector('#clear-button')?.addEventListener('click', clearEntriesFromIndexedDb);
 
 window.addEventListener('load', async () => {
