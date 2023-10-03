@@ -7,76 +7,32 @@ let db = null;
 
 // IndexedDB Methods
 const initIndexedDb = (dbName, stores) => {
-	return new Promise((resolve, reject) => {
-		const request = indexedDB.open(dbName, dbVersion);
-		request.onerror = (event) => {
-			reject(event.target.error);
-		};
-		request.onsuccess = (event) => {
-			resolve(event.target.result);
-		};
-		request.onupgradeneeded = (event) => {
-			stores.forEach((store) => {
-				const objectStore = event.target.result.createObjectStore(store.name, {
-					keyPath: store.keyPath,
-				});
-				objectStore.createIndex(store.keyPath, store.keyPath, { unique: true });
-			});
-		};
-	});
+	// TODO: Add code to init the DB
+	console.log(dbName, stores)
 };
 
 const clearEntriesFromIndexedDb = () => {
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-
-	store.clear();
-	clearGalleryImages();
-
-	store.transaction.oncomplete = () => {
-		renderStorageQuotaInfo();
-	};
+	// TODO: Add code to clear the DB
+	console.log('Clearing entries from DB')
 };
 
 const deleteImageFromIndexedDb = (storeKey) => {
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	store.delete(storeKey);
-	store.transaction.oncomplete = async () => {
-		clearGalleryImages();
-		renderAvailableImagesFromDb();
-		await renderStorageQuotaInfo();
-	};
+	// TODO: Add code to delete one image
+	console.log('Deleting image from DB' + storeKey)
 };
 
 const renderAvailableImagesFromDb = () => {
-	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
-		const cursor = event.target.result;
-		if (cursor) {
-			renderGalleryColumn(cursor);
-			cursor.continue();
-		}
-	};
+	// TODO: Add code to render the images
+	console.log('Rendering images from DB')
 };
 
 const handleSearch = async (ev) => {
 	ev.preventDefault();
-	const searchInput = document.getElementById('search').value;
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	const cursorRequest = store.openCursor();
-	clearGalleryImages();
-
-	cursorRequest.onsuccess = (event) => {
-		const cursor = event.target.result;
-		if (cursor) {
-			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
-				renderGalleryColumn(cursor);
-			}
-			cursor.continue();
-		}
-	};
+	// TODO: Add code to handle the search
+	console.log('Handling search for keyword ' + ev.target[0].value)
 };
 
 // Form functions
-
 /**
  * @desc Gets the file from the input field and adds it to the IndexedDB
  * @param {Event} ev
