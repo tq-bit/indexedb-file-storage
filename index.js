@@ -180,13 +180,14 @@ document.querySelector('#search-form')?.addEventListener('submit', handleSearch)
 document.querySelector('#clear-button')?.addEventListener('click', clearEntriesFromIndexedDb);
 
 window.addEventListener('load', async () => {
-	const requestPermission = await navigator.storage.persisted();
-	const persistent = await navigator.storage.persist();
-	if (persistent) {
-		db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
-		renderAvailableImagesFromDb();
-		await renderStorageQuotaInfo();
-	} else {
-		console.warn('Persistence is not supported');
-	}
+	/** Uncomment the following code to enable user's persistent storage settings */
+	// const requestPermission = await navigator.storage.persisted();
+	// const persistent = await navigator.storage.persist();
+	// if (persistent && requestPermission) {
+	db = await initIndexedDb('my-db', [{ name: storeName, keyPath: storeKey }]);
+	renderAvailableImagesFromDb();
+	await renderStorageQuotaInfo();
+	// } else {
+	// 	console.warn('Persistence is not supported');
+	// }
 });
