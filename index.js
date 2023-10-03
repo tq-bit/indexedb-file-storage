@@ -27,13 +27,24 @@ const initIndexedDb = (dbName, stores) => {
 };
 
 const clearEntriesFromIndexedDb = () => {
-	// TODO: Add code to clear the DB
-	console.log('Clearing entries from DB')
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+
+	store.clear();
+	clearGalleryImages();
+
+	store.transaction.oncomplete = () => {
+		renderStorageQuotaInfo();
+	};
 };
 
 const deleteImageFromIndexedDb = (storeKey) => {
-	// TODO: Add code to delete one image
-	console.log('Deleting image from DB' + storeKey)
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.delete(storeKey);
+	store.transaction.oncomplete = async () => {
+		clearGalleryImages();
+		renderAvailableImagesFromDb();
+		await renderStorageQuotaInfo();
+	};
 };
 
 const renderAvailableImagesFromDb = () => {
