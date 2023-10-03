@@ -5,72 +5,7 @@ const storeKey = 'fileName';
 const dbVersion = 1;
 let db = null;
 
-const formatAsByteString = (bytes) => {
-	const oneGigabyte = 1024 * 1024 * 1024;
-	const oneMegabyte = 1024 * 1024;
-	const oneKilobyte = 1024;
-
-	return bytes > oneGigabyte ? `${(bytes / oneGigabyte).toFixed(2)} GB` : bytes > oneMegabyte ? `${(bytes / oneMegabyte).toFixed(2)} MB` : `${(bytes / oneKilobyte).toFixed(2)}KB`;
-}
-
-// Methods for Storage quota
-const getStorageQuotaText = async () => {
-	const estimate = await navigator.storage.estimate();
-	const totalQuota = +(estimate.quota || 0);
-	const usedQuota = +(estimate.usage || 0);
-	const freeQuota = totalQuota - usedQuota;
-	return {
-		totalQuota: formatAsByteString(totalQuota),
-		usedQuota: formatAsByteString(usedQuota),
-		freeQuota: formatAsByteString(freeQuota)
-	};
-};
-
-// Methods for form buttons and file input
-/**
- * @desc Gets the file from the input field and adds it to the IndexedDB
- * @param {Event} ev
- * @returns {Promise<void>}
- */
-const handleSubmit = async (ev) => {
-	ev.preventDefault();
-	const file = await getFileFromInput();
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	store.add(file);
-
-	store.transaction.oncomplete = () => {
-		clearGalleryImages();
-		renderAvailableImagesFromDb();
-		renderStorageQuotaInfo();
-	};
-};
-
-const handleSearch = async (ev) => {
-	ev.preventDefault();
-	const searchInput = document.getElementById('search').value;
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	const cursorRequest = store.openCursor();
-	clearGalleryImages();
-
-	cursorRequest.onsuccess = (event) => {
-		const cursor = event.target.result;
-		if (cursor) {
-			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
-				renderGalleryColumn(cursor);
-			}
-			cursor.continue();
-		}
-	};
-};
-
-
 // IndexedDB Methods
-/**
- * @desc Initializes the IndexedDB database
- * @param {string} dbName
- * @param {{name: string, keyPath: string}[]} stores
- * @returns {Promise<IDBDatabase>}
- */
 const initIndexedDb = (dbName, stores) => {
 	return new Promise((resolve, reject) => {
 		const request = indexedDB.open(dbName, dbVersion);
@@ -122,7 +57,44 @@ const renderAvailableImagesFromDb = () => {
 	};
 };
 
-// Util functions
+const handleSearch = async (ev) => {
+	ev.preventDefault();
+	const searchInput = document.getElementById('search').value;
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	const cursorRequest = store.openCursor();
+	clearGalleryImages();
+
+	cursorRequest.onsuccess = (event) => {
+		const cursor = event.target.result;
+		if (cursor) {
+			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
+				renderGalleryColumn(cursor);
+			}
+			cursor.continue();
+		}
+	};
+};
+
+// Form functions
+
+/**
+ * @desc Gets the file from the input field and adds it to the IndexedDB
+ * @param {Event} ev
+ * @returns {Promise<void>}
+ */
+const handleSubmit = async (ev) => {
+	ev.preventDefault();
+	const file = await getFileFromInput();
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.add(file);
+
+	store.transaction.oncomplete = () => {
+		clearGalleryImages();
+		renderAvailableImagesFromDb();
+		renderStorageQuotaInfo();
+	};
+};
+
 /**
  * @desc Gets the file from the input field
  * @returns {Promise<object>}
@@ -146,10 +118,18 @@ const getFileFromInput = () => {
 };
 
 // Methods for the image gallery
+
+/**
+ * @desc Clears the gallery images from the DOM
+ */
 const clearGalleryImages = () => {
 	document.getElementById('images').innerHTML = '';
 }
 
+/**
+ * @desc Renders the gallery images in the DOM
+ * @param {IDBCursorWithValue} cursor
+ */
 const renderGalleryColumn = (cursor) => {
 	const imageBuffer = cursor.value.data;
 	const imageBlog = new Blob([imageBuffer]);
@@ -195,6 +175,23 @@ const renderGalleryColumn = (cursor) => {
 	col.appendChild(card);
 }
 
+// Methods for Storage quota
+/**
+ * @desc Gets the current storage quota
+ * @returns {Promise<{totalQuota: string, usedQuota: string, freeQuota: string}>}
+ */
+const getStorageQuotaText = async () => {
+	const estimate = await navigator.storage.estimate();
+	const totalQuota = +(estimate.quota || 0);
+	const usedQuota = +(estimate.usage || 0);
+	const freeQuota = totalQuota - usedQuota;
+	return {
+		totalQuota: formatAsByteString(totalQuota),
+		usedQuota: formatAsByteString(usedQuota),
+		freeQuota: formatAsByteString(freeQuota)
+	};
+};
+
 /**
  * @desc Renders the storage quota info in the DOM
  * @returns {Promise<void>}
@@ -205,6 +202,16 @@ const renderStorageQuotaInfo = async () => {
 	document.getElementById('storage-used').textContent = usedQuota;
 	document.getElementById('storage-free').textContent = freeQuota;
 }
+
+// Util functions
+const formatAsByteString = (bytes) => {
+	const oneGigabyte = 1024 * 1024 * 1024;
+	const oneMegabyte = 1024 * 1024;
+	const oneKilobyte = 1024;
+
+	return bytes > oneGigabyte ? `${(bytes / oneGigabyte).toFixed(2)} GB` : bytes > oneMegabyte ? `${(bytes / oneMegabyte).toFixed(2)} MB` : `${(bytes / oneKilobyte).toFixed(2)}KB`;
+}
+
 
 // Init event listeners
 document.querySelector('#file-form')?.addEventListener('submit', handleSubmit);
