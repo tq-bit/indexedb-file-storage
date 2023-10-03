@@ -37,8 +37,13 @@ const deleteImageFromIndexedDb = (storeKey) => {
 };
 
 const renderAvailableImagesFromDb = () => {
-	// TODO: Add code to render the images
-	console.log('Rendering images from DB')
+	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
+		const cursor = event.target.result;
+		if (cursor) {
+			renderGalleryColumn(cursor);
+			cursor.continue();
+		}
+	};
 };
 
 const handleSearch = async (ev) => {
@@ -54,8 +59,16 @@ const handleSearch = async (ev) => {
  * @returns {Promise<void>}
  */
 const handleSubmit = async (ev) => {
-	// TODO: Add code to add the file to the DB
-	console.log('Adding file to DB');
+	ev.preventDefault();
+	const file = await getFileFromInput();
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.add(file);
+
+	store.transaction.oncomplete = () => {
+		clearGalleryImages();
+		renderAvailableImagesFromDb();
+		renderStorageQuotaInfo();
+	};
 };
 
 /**
