@@ -48,8 +48,17 @@ const renderAvailableImagesFromDb = () => {
 
 const handleSearch = async (ev) => {
 	ev.preventDefault();
-	// TODO: Add code to handle the search
-	console.log('Handling search for keyword ' + ev.target[0].value)
+	clearGalleryImages();
+	const searchInput = document.getElementById('search').value;
+	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
+		const cursor = event.target.result;
+		if (cursor) {
+			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
+				renderGalleryColumn(cursor);
+			}
+			cursor.continue();
+		}
+	};
 };
 
 // Form functions
