@@ -5,12 +5,15 @@ const storeKey = 'fileName';
 let db = null;
 
 // Methods for Storage quota
+/**
+ * @desc Gets the storage quota text
+ * @returns {Promise<{totalQuota: string, usedQuota: string, freeQuota: string}>}
+ */
 const getStorageQuotaText = async () => {
   const oneGigabyte = 1024 * 1024 * 1024;
   const oneMegabyte = 1024 * 1024;
   const oneKilobyte = 1024;
 	const estimate = await navigator.storage.estimate();
-  console.log(estimate)
 	const totalQuota = +(estimate.quota || 0);
 	const usedQuota = +(estimate.usage || 0);
   const freeQuota = totalQuota - usedQuota;
@@ -21,6 +24,10 @@ const getStorageQuotaText = async () => {
 	};
 };
 
+/**
+ * @desc Renders the storage quota info in the DOM
+ * @returns {Promise<void>}
+ */
 const renderStorageQuotaInfo = async () => {
   const { totalQuota, usedQuota, freeQuota } = await getStorageQuotaText();
   document.getElementById('storage-total').textContent = totalQuota;
@@ -29,6 +36,12 @@ const renderStorageQuotaInfo = async () => {
 }
 
 // Methods for form buttons and file input
+
+/**
+ * @desc Gets the file from the input field and adds it to the IndexedDB
+ * @param {Event} ev
+ * @returns {Promise<void>}
+ */
 const handleSubmit = async (ev) => {
 	ev.preventDefault();
 	const file = await getFileFromInput();
@@ -64,12 +77,7 @@ const getFileFromInput = () => {
 	});
 };
 
-const clearEntriesFromIndexedDb = () => {
-	db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
-	clearPreviousImages();
 
-  renderStorageQuotaInfo();
-};
 
 // IndexedDB Methods
 /**
@@ -95,6 +103,10 @@ const initIndexedDb = (dbName, stores) => {
 	});
 };
 
+/**
+ * @desc Renders the available images from the IndexedDB
+ * @returns {void}
+ */
 const renderAvailableImagesFromDb = () => {
 	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
 		const cursor = event.target.result;
@@ -126,8 +138,22 @@ const renderAvailableImagesFromDb = () => {
 	};
 };
 
+/**
+ * @desc Clears the previous images from the DOM
+ * @returns {void}
+ */
 const clearPreviousImages = () => {
 	document.getElementById('images').innerHTML = '';
+};
+
+/**
+ * @desc Clears the previous images from IndexedDB
+ * @returns {void}
+ */
+const clearEntriesFromIndexedDb = () => {
+	db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
+	clearPreviousImages();
+  renderStorageQuotaInfo();
 };
 
 // Init event listeners
