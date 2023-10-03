@@ -7,8 +7,23 @@ let db = null;
 
 // IndexedDB Methods
 const initIndexedDb = (dbName, stores) => {
-	// TODO: Add code to init the DB
-	console.log(dbName, stores)
+	return new Promise((resolve, reject) => {
+		const request = indexedDB.open(dbName, dbVersion);
+		request.onerror = (event) => {
+			reject(event.target.error);
+		};
+		request.onsuccess = (event) => {
+			resolve(event.target.result);
+		};
+		request.onupgradeneeded = (event) => {
+			stores.forEach((store) => {
+				const objectStore = event.target.result.createObjectStore(store.name, {
+					keyPath: store.keyPath,
+				});
+				objectStore.createIndex(store.keyPath, store.keyPath, { unique: true });
+			});
+		};
+	});
 };
 
 const clearEntriesFromIndexedDb = () => {
