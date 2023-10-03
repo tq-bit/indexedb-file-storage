@@ -59,12 +59,9 @@ const renderAvailableImagesFromDb = () => {
 
 const handleSearch = async (ev) => {
 	ev.preventDefault();
-	const searchInput = document.getElementById('search').value;
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	const cursorRequest = store.openCursor();
 	clearGalleryImages();
-
-	cursorRequest.onsuccess = (event) => {
+	const searchInput = document.getElementById('search').value;
+	db.transaction(storeName, 'readwrite').objectStore(storeName).openCursor().onsuccess = (event) => {
 		const cursor = event.target.result;
 		if (cursor) {
 			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
