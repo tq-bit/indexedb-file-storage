@@ -39,16 +39,7 @@ const handleSearch = async (ev) => {
  * @returns {Promise<void>}
  */
 const handleSubmit = async (ev) => {
-	ev.preventDefault();
-	const file = await getFileFromInput();
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	store.add(file);
-
-	store.transaction.oncomplete = () => {
-		clearGalleryImages();
-		renderAvailableImagesFromDb();
-		renderStorageQuotaInfo();
-	};
+	console.log('Adding file to DB');
 };
 
 /**
