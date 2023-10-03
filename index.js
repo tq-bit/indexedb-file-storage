@@ -61,7 +61,7 @@ const handleSearch = async (ev) => {
 	ev.preventDefault();
 	clearGalleryImages();
 	const searchInput = document.getElementById('search').value;
-	db.transaction(storeName, 'readwrite').objectStore(storeName).openCursor().onsuccess = (event) => {
+	db.transaction(storeName, 'readonly').objectStore(storeName).openCursor().onsuccess = (event) => {
 		const cursor = event.target.result;
 		if (cursor) {
 			if (cursor.value[storeKey].toLowerCase().includes(searchInput.toLowerCase())) {
