@@ -107,6 +107,8 @@ const getFileFromInput = () => {
 			document.getElementById('file').value = '';
 			resolve({
 				[storeKey]: file.name,
+				type: file.type,
+				size: file.size,
 				data: event.target.result,
 			});
 		};
@@ -131,6 +133,7 @@ const clearGalleryImages = () => {
  * @param {IDBCursorWithValue} cursor
  */
 const renderGalleryColumn = (cursor) => {
+	const galleryContainer = document.getElementById('images');
 	const imageBuffer = cursor.value.data;
 	const imageBlog = new Blob([imageBuffer]);
 
@@ -173,6 +176,8 @@ const renderGalleryColumn = (cursor) => {
 	card.appendChild(image);
 	card.appendChild(cardBody);
 	col.appendChild(card);
+
+	galleryContainer.appendChild(col);
 }
 
 // Methods for Storage quota
