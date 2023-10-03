@@ -4,81 +4,6 @@ const storeName = 'localFiles';
 const storeKey = 'fileName';
 let db = null;
 
-// Methods for Storage quota
-/**
- * @desc Gets the storage quota text
- * @returns {Promise<{totalQuota: string, usedQuota: string, freeQuota: string}>}
- */
-const getStorageQuotaText = async () => {
-  const oneGigabyte = 1024 * 1024 * 1024;
-  const oneMegabyte = 1024 * 1024;
-  const oneKilobyte = 1024;
-	const estimate = await navigator.storage.estimate();
-	const totalQuota = +(estimate.quota || 0);
-	const usedQuota = +(estimate.usage || 0);
-  const freeQuota = totalQuota - usedQuota;
-	return {
-    totalQuota: totalQuota > oneGigabyte ? `${(totalQuota / oneGigabyte).toFixed(2)} GB` : totalQuota > oneMegabyte ? `${(totalQuota / oneMegabyte).toFixed(2)} MB` : `${(totalQuota / oneKilobyte).toFixed(2)}KB`,
-    usedQuota: usedQuota > oneGigabyte ? `${(usedQuota / oneGigabyte).toFixed(2)} GB` : usedQuota > oneMegabyte ? `${(usedQuota / oneMegabyte).toFixed(2)} MB` : `${(usedQuota / oneKilobyte).toFixed(2)}KB`,
-    freeQuota: freeQuota > oneGigabyte ? `${(freeQuota / oneGigabyte).toFixed(2)} GB` : freeQuota > oneMegabyte ? `${(freeQuota / oneMegabyte).toFixed(2)} MB` : `${(freeQuota / oneKilobyte).toFixed(2)}KB`,
-	};
-};
-
-/**
- * @desc Renders the storage quota info in the DOM
- * @returns {Promise<void>}
- */
-const renderStorageQuotaInfo = async () => {
-  const { totalQuota, usedQuota, freeQuota } = await getStorageQuotaText();
-  document.getElementById('storage-total').textContent = totalQuota;
-  document.getElementById('storage-used').textContent = usedQuota;
-  document.getElementById('storage-free').textContent = freeQuota;
-}
-
-// Methods for form buttons and file input
-
-/**
- * @desc Gets the file from the input field and adds it to the IndexedDB
- * @param {Event} ev
- * @returns {Promise<void>}
- */
-const handleSubmit = async (ev) => {
-	ev.preventDefault();
-	const file = await getFileFromInput();
-	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
-	store.add(file);
-
-	store.transaction.oncomplete = () => {
-		clearPreviousImages();
-		renderAvailableImagesFromDb();
-    renderStorageQuotaInfo()
-	};
-};
-
-/**
- * @desc Gets the file from the input field
- * @returns {Promise<object>}
- */
-const getFileFromInput = () => {
-	return new Promise((resolve, reject) => {
-		const file = document.getElementById('file').files[0];
-		const reader = new FileReader();
-		reader.onload = (event) => {
-			document.getElementById('file').value = '';
-			resolve({
-				[storeKey]: file.name,
-				data: event.target.result,
-			});
-		};
-		reader.onerror = (event) => {
-			reject(event.target.error);
-		};
-		reader.readAsArrayBuffer(file);
-	});
-};
-
-
-
 // IndexedDB Methods
 /**
  * @desc Initializes the IndexedDB database
@@ -154,6 +79,78 @@ const clearEntriesFromIndexedDb = () => {
 	db.transaction(storeName, 'readwrite').objectStore(storeName).clear();
 	clearPreviousImages();
   renderStorageQuotaInfo();
+};
+
+// Methods for Storage quota
+/**
+ * @desc Gets the storage quota text
+ * @returns {Promise<{totalQuota: string, usedQuota: string, freeQuota: string}>}
+ */
+const getStorageQuotaText = async () => {
+  const oneGigabyte = 1024 * 1024 * 1024;
+  const oneMegabyte = 1024 * 1024;
+  const oneKilobyte = 1024;
+	const estimate = await navigator.storage.estimate();
+	const totalQuota = +(estimate.quota || 0);
+	const usedQuota = +(estimate.usage || 0);
+  const freeQuota = totalQuota - usedQuota;
+	return {
+    totalQuota: totalQuota > oneGigabyte ? `${(totalQuota / oneGigabyte).toFixed(2)} GB` : totalQuota > oneMegabyte ? `${(totalQuota / oneMegabyte).toFixed(2)} MB` : `${(totalQuota / oneKilobyte).toFixed(2)}KB`,
+    usedQuota: usedQuota > oneGigabyte ? `${(usedQuota / oneGigabyte).toFixed(2)} GB` : usedQuota > oneMegabyte ? `${(usedQuota / oneMegabyte).toFixed(2)} MB` : `${(usedQuota / oneKilobyte).toFixed(2)}KB`,
+    freeQuota: freeQuota > oneGigabyte ? `${(freeQuota / oneGigabyte).toFixed(2)} GB` : freeQuota > oneMegabyte ? `${(freeQuota / oneMegabyte).toFixed(2)} MB` : `${(freeQuota / oneKilobyte).toFixed(2)}KB`,
+	};
+};
+
+/**
+ * @desc Renders the storage quota info in the DOM
+ * @returns {Promise<void>}
+ */
+const renderStorageQuotaInfo = async () => {
+  const { totalQuota, usedQuota, freeQuota } = await getStorageQuotaText();
+  document.getElementById('storage-total').textContent = totalQuota;
+  document.getElementById('storage-used').textContent = usedQuota;
+  document.getElementById('storage-free').textContent = freeQuota;
+}
+
+// Methods for form buttons and file input
+/**
+ * @desc Gets the file from the input field and adds it to the IndexedDB
+ * @param {Event} ev
+ * @returns {Promise<void>}
+ */
+const handleSubmit = async (ev) => {
+	ev.preventDefault();
+	const file = await getFileFromInput();
+	const store = db.transaction(storeName, 'readwrite').objectStore(storeName);
+	store.add(file);
+
+	store.transaction.oncomplete = () => {
+		clearPreviousImages();
+		renderAvailableImagesFromDb();
+    renderStorageQuotaInfo()
+	};
+};
+
+/**
+ * @desc Gets the file from the input field
+ * @returns {Promise<object>}
+ */
+const getFileFromInput = () => {
+	return new Promise((resolve, reject) => {
+		const file = document.getElementById('file').files[0];
+		const reader = new FileReader();
+		reader.onload = (event) => {
+			document.getElementById('file').value = '';
+			resolve({
+				[storeKey]: file.name,
+				data: event.target.result,
+			});
+		};
+		reader.onerror = (event) => {
+			reject(event.target.error);
+		};
+		reader.readAsArrayBuffer(file);
+	});
 };
 
 // Init event listeners
